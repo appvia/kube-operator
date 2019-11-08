@@ -70,6 +70,7 @@ spec:
   username: jon
   teamName: na
 ---
+## Local kind cluster - credentials are useless
 apiVersion: clusters.hub.appvia.io/v1
 kind: Kubernetes
 metadata:
@@ -92,7 +93,6 @@ metadata:
   name: app1-9cb6d0d6cd27
   namespace: team-devs
   labels:
-
 spec:
   namespaceLabels:
     hello: world

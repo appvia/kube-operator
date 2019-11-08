@@ -40,6 +40,8 @@ func (r *ReconcileNamespaceClaim) Update(
 	cc kubernetes.Interface,
 	resource *kubev1.NamespaceClaim) error {
 
+	uid := string(resource.GetUID())
+
 	// --- Logic ---
 	// we have a client to the remote kubernetes cluster
 	// we need to check the namespace is there and if not create it
@@ -54,16 +56,23 @@ func (r *ReconcileNamespaceClaim) Update(
 		"resource.name", resource.Name,
 		"resource.namespace", resource.Namespace,
 		"team.name", resource.Spec.Team.Name,
-		"workspace.name", resource.Spec.Workspace.Name)
+		"workspace.name", resource.Spec.Workspace.Name,
+		"uid", uid)
 
 	//
 	// @step: check the namespace exists, if not create it, else update it
 	//
+	annotations := resource.Spec.AnnotationsLabels
+	if annotations == nil {
+		annotations = make(map[string]string, 0)
+	}
+	annotations["hub.appvia.io/uid"] = uid
+
 	namespace := &corev1.Namespace{
 		ObjectMeta: metav1.ObjectMeta{
 			Name:        resource.Spec.Name,
 			Labels:      resource.Spec.NamespaceLabels,
-			Annotations: resource.Spec.AnnotationsLabels,
+			Annotations: annotations,
 		},
 	}
 
@@ -109,6 +118,7 @@ func (r *ReconcileNamespaceClaim) Update(
 				"hub.appvia.io/team":      resource.Spec.Team.Name,
 				"hub.appvia.io/workspace": resource.Spec.Workspace.Name,
 			},
+			Annotations: map[string]string{"hub.appvia.io/uid": uid},
 		},
 		RoleRef: rbacv1.RoleRef{
 			APIGroup: rbacv1.GroupName,
