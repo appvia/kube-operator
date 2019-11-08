@@ -1,0 +1,96 @@
+---
+apiVersion: v1
+kind: Namespace
+metadata:
+  name: hub
+---
+apiVersion: v1
+kind: Namespace
+metadata:
+  name: team-devs
+---
+apiVersion: org.hub.appvia.io/v1
+kind: User
+metadata:
+  name: rohith
+spec:
+  username: rohith@appvia.io
+---
+apiVersion: org.hub.appvia.io/v1
+kind: Team
+metadata:
+  name: devs
+  namespace: hub
+  labels:
+    hub.appvia.io/team: dev
+spec:
+  summary: Dev Team
+  description: Dev Team
+---
+apiVersion: org.hub.appvia.io/v1
+kind: Workspace
+metadata:
+  name: app1
+  namespace: team-devs
+  labels:
+    hub.appvia.io/team: dev
+    hub.appvia.io/workspace: app1
+spec:
+  summary: Apps Workspace
+  description: Apps Workspace
+---
+apiVersion: org.hub.appvia.io/v1
+kind: TeamMembership
+metadata:
+  name: rohith-60be02ee02221
+  namespace: team-devs
+  labels:
+    hub.appvia.io/team: dev
+    hub.appvia.io/user: rohith
+spec:
+  username: rohith
+  teamName: devs
+---
+apiVersion: clusters.hub.appvia.io/v1
+kind: Kubernetes
+metadata:
+  name: dev
+  namespace: team-devs
+spec:
+  ownership:
+    apiGroup: gke.compute.hub.appvia.io
+    kind: GKE
+    name: dev
+    namespace: team-devs
+    version: v1
+  endpoint: https://127.0.0.1:42051
+  token: eyJhbGciOiJSUzI1NiIsImtpZCI6IiJ9.eyJpc3MiOiJrdWJlcm5ldGVzL3NlcnZpY2VhY2NvdW50Iiwia3ViZXJuZXRlcy5pby9zZXJ2aWNlYWNjb3VudC9uYW1lc3BhY2UiOiJrdWJlLXN5c3RlbSIsImt1YmVybmV0ZXMuaW8vc2VydmljZWFjY291bnQvc2VjcmV0Lm5hbWUiOiJzeXNkbWluLXRva2VuLTdqMnA2Iiwia3ViZXJuZXRlcy5pby9zZXJ2aWNlYWNjb3VudC9zZXJ2aWNlLWFjY291bnQubmFtZSI6InN5c2RtaW4iLCJrdWJlcm5ldGVzLmlvL3NlcnZpY2VhY2NvdW50L3NlcnZpY2UtYWNjb3VudC51aWQiOiJkOTE0M2MyZi02ZWViLTQ0ODItYjA4ZC04ZDI4ZmY4MjQzYTUiLCJzdWIiOiJzeXN0ZW06c2VydmljZWFjY291bnQ6a3ViZS1zeXN0ZW06c3lzZG1pbiJ9.U9_RMteKjTy88pcj9j2QYMAQkPRQTr8djK8JkVWgwYYgQyJupBg3imCQChym5XdHFUKXP9AC4UEnZQi_XpO0WNDy6O6HS8OWLSAsSK7whPM2wWr9q8ByqsaMXf74GRbn8J9Tf2SP2ijCogfwPxD7hlNzF7lqEk_U-3KY9n1In3EiG1-hWeX-keAYmfL5EnHtsFbHc8SGkZ6NY-3sa0RHSM0mHFQgD1xsBsgXZ0OZuRqSTCcCHgStWT61rEMPMfMz3zmJHYz2XM8gtts-F15ovX46q9KkXMRE5nO-W74YBlr0AvX2TQCOFW3K89amwwX6nZJO56ODc6bOPIBk81ZGiA
+  caCertificate: LS0tLS1CRUdJTiBDRVJUSUZJQ0FURS0tLS0tCk1JSUN5RENDQWJDZ0F3SUJBZ0lCQURBTkJna3Foa2lHOXcwQkFRc0ZBREFWTVJNd0VRWURWUVFERXdwcmRXSmwKY201bGRHVnpNQjRYRFRFNU1URXdPREUxTURnek9Gb1hEVEk1TVRFd05URTFNRGd6T0Zvd0ZURVRNQkVHQTFVRQpBeE1LYTNWaVpYSnVaWFJsY3pDQ0FTSXdEUVlKS29aSWh2Y05BUUVCQlFBRGdnRVBBRENDQVFvQ2dnRUJBSzZtCnByTGdSckFlWE9xc3dacXJMdGV0U0drUVliVnRiVUhOeGgzbVZ6WFRkaGJ3MTVOY0piQ0RIWkZBTG5VTzdRSzkKVURUcGZ5OVFicUFDZS9nN2xIZmYwbnVMdUtYU0prZVg1Y3JhakM0SWtGTlNiekk4ejNHRVJZSitNbVUwcFc2dgozR1R5VmlsdW5QZGV2OVlHblB0bVovd29iclNBeGJab296U1hlSWhvdXlxRmdYRDF1LzgwZS9rMVhHc0dtd0pPCnlyejVHQUNReEcxbTVlcXZ3VzNZS3Q3eGFwOExUUnM5REFFTXB6VWd3TGdEOFlzc3NZVGcrVDRnamRmMjcrOHIKOWdvMWhZR3FPRWpFRHZJOXViRjJid2RldVI2cmV1eE9kbFE3Y2k2dVRyRm9ZQnNxSEpuTGVQWnBkNzducHYzOQpWQzRncWduN0xwZW5tTEMvVUdNQ0F3RUFBYU1qTUNFd0RnWURWUjBQQVFIL0JBUURBZ0trTUE4R0ExVWRFd0VCCi93UUZNQU1CQWY4d0RRWUpLb1pJaHZjTkFRRUxCUUFEZ2dFQkFFbVJubWNkclo0YzkrcTFhTWE4T1FUUUlvNVcKVlhhVkgwWEcyd2poQS9PNlpycDY4OWU0c3p3Q2lhekxEaG83WGsrZlJMRFN1aXlzZFNrSllodlJPWnlXcllxSQpJNUNMb0pPRVN5T2NJM1Y1eSt0UFdnNDhJNzdRZ08xRy9oZVRTdjJqOURZdHUwZkhIQ3d4MWdWTnJ4NC9XVDVCCjJzNU5uemwzejF5QXFEUEFsbUw2Z2NiQkJSSW85K0FsNHdLdFJyaHFKNDFMVWJycGRKT3lDbCtjcnJmR0UvMGcKRUtPMDM1Skc5bTZsc3FDRDd2ZkxJRUY2Ni9tTlFFYktCNlJ0eENjTktUSUppRVhNNUdmcmE5YU0vcFlhdkFQVwpQbFg4SWJOUkxlR3dHQjZEWlE5T2p1M2prMDk3WnJDL3pFdnVNcEZ0U3ZiRUlNcUtaaDloQWdLRG1kOD0KLS0tLS1FTkQgQ0VSVElGSUNBVEUtLS0tLQo=
+---
+apiVersion: kube.hub.appvia.io/v1
+kind: NamespaceClaim
+metadata:
+  name: app1-9cb6d0d6cd27
+  namespace: team-devs
+spec:
+  namespaceLabels:
+    hello: world
+  cluster:
+    apiGroup: clusters.hub.appvia.io
+    kind: Kubernetes
+    name: dev
+    namespace: team-devs
+    version: v1
+  team:
+    apiGroup: org.hub.appvia.io
+    kind: Team
+    name: devs
+    namespace: hub
+    version: v1
+  workspace:
+    apiGroup: org.hub.appvia.io
+    kind: Workspace
+    name: app1
+    namespace: team-devs
+    version: v1
+  name: apps

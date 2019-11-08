@@ -1,0 +1,7 @@
+apiVersion: kube.hub.appvia.io/v1
+kind: NamespaceClaim
+metadata:
+  name: example-namespaceclaim
+spec:
+  # Add fields here
+  size: 3
