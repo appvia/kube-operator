@@ -75,7 +75,7 @@ func add(mgr manager.Manager, r reconcile.Reconciler) error {
 		ToRequests: handler.ToRequestsFunc(func(binding handler.MapObject) []reconcile.Request {
 			ctx := context.Background()
 			// @step: get a list of any namespaceclaims for the team across all workspaces
-			list, err := ListTeamNamespaceClaims(ctx, mgr.GetClient(), binding.Meta.GetName())
+			list, err := ListTeamNamespaceClaims(ctx, mgr.GetClient(), binding.Meta.GetNamespace())
 			if err != nil {
 				log.WithValues(
 					"team", binding.Meta.GetNamespace(),

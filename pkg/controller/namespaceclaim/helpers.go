@@ -103,11 +103,7 @@ func NamespaceClaimsToRequests(items []kubev1.NamespaceClaim) []reconcile.Reques
 func ListTeamNamespaceClaims(ctx context.Context, c client.Client, team string) ([]kubev1.NamespaceClaim, error) {
 	list := &kubev1.NamespaceClaimList{}
 
-	labels := map[string]string{
-		"hub.appvia.io/team": team,
-	}
-
-	if err := c.List(ctx, list, client.MatchingLabels(labels), client.InNamespace("")); err != nil {
+	if err := c.List(ctx, list, client.InNamespace(team)); err != nil {
 		return []kubev1.NamespaceClaim{}, err
 	}
 
