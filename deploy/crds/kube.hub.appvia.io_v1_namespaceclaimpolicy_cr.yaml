@@ -1,0 +1,7 @@
+apiVersion: kube.hub.appvia.io/v1
+kind: NamespaceClaimPolicy
+metadata:
+  name: example-namespaceclaimpolicy
+spec:
+  # Add fields here
+  size: 3

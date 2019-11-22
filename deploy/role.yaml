@@ -57,5 +57,6 @@ rules:
   - kube.hub.appvia.io
   resources:
   - '*'
+  - namespaceclaimpolicies
   verbs:
   - '*'

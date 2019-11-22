@@ -27,11 +27,25 @@ import (
 	k8s "github.com/gambol99/hub-utils/pkg/kubernetes"
 
 	kerrors "k8s.io/apimachinery/pkg/api/errors"
+	"k8s.io/apimachinery/pkg/runtime"
 	"k8s.io/apimachinery/pkg/types"
 	"k8s.io/client-go/kubernetes"
 	"sigs.k8s.io/controller-runtime/pkg/client"
 	"sigs.k8s.io/controller-runtime/pkg/reconcile"
 )
+
+// HubLabel returns a label off the resource
+func HubLabel(o runtime.Object, label string) string {
+	if o == nil {
+		return ""
+	}
+	labels := o.GetLabels()
+	if labels == nil {
+		return ""
+	}
+
+	return labels["hub.appvia.io/"+label]
+}
 
 // HubNamespaceType returns a reference to the hub namespaced type
 func HubNamespaceType(name string) types.NamespacedName {
@@ -80,6 +94,27 @@ func MakeClusterKubeClient(ctx context.Context, c client.Client, reference types
 
 	// @step: create a kubernetes client to this cluster
 	return k8s.NewFromToken(cluster.Spec.Endpoint, cluster.Spec.Token, "")
+}
+
+// ReconcileNamespaceClaims returns a list of claims to reconcile based on a change
+func ReconcileNamespaceClaims(ctx context.Context, c client.Client, name, namespace string) ([]reconcile.Request, error) {
+	log.WithValues(
+		"trigger.name", name,
+		"trigger.namespace", namespace,
+	).Info("triggering a namespaceclaim reconcilation based on upstream trigger")
+
+	list, err := ListTeamNamespaceClaims(ctx, c, namespace)
+	if err != nil {
+		log.WithValues(
+			"trigger.name", name,
+			"trigger.namespace", namespace,
+		).Error(err, "failed to retrieve a list of namespaceclaims in team namespace")
+
+		// @TODO we need way to surface these to the users
+		return []reconcile.Request{}, err
+	}
+
+	return NamespaceClaimsToRequests(list), nil
 }
 
 // NamespaceClaimsToRequests converts a collection of claims to requests

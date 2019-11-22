@@ -11,9 +11,12 @@ import (
 
 func GetOpenAPIDefinitions(ref common.ReferenceCallback) map[string]common.OpenAPIDefinition {
 	return map[string]common.OpenAPIDefinition{
-		"github.com/appvia/kube-operator/pkg/apis/kube/v1.NamespaceClaim":       schema_pkg_apis_kube_v1_NamespaceClaim(ref),
-		"github.com/appvia/kube-operator/pkg/apis/kube/v1.NamespaceClaimSpec":   schema_pkg_apis_kube_v1_NamespaceClaimSpec(ref),
-		"github.com/appvia/kube-operator/pkg/apis/kube/v1.NamespaceClaimStatus": schema_pkg_apis_kube_v1_NamespaceClaimStatus(ref),
+		"github.com/appvia/kube-operator/pkg/apis/kube/v1.NamespaceClaim":             schema_pkg_apis_kube_v1_NamespaceClaim(ref),
+		"github.com/appvia/kube-operator/pkg/apis/kube/v1.NamespaceClaimPolicy":       schema_pkg_apis_kube_v1_NamespaceClaimPolicy(ref),
+		"github.com/appvia/kube-operator/pkg/apis/kube/v1.NamespaceClaimPolicySpec":   schema_pkg_apis_kube_v1_NamespaceClaimPolicySpec(ref),
+		"github.com/appvia/kube-operator/pkg/apis/kube/v1.NamespaceClaimPolicyStatus": schema_pkg_apis_kube_v1_NamespaceClaimPolicyStatus(ref),
+		"github.com/appvia/kube-operator/pkg/apis/kube/v1.NamespaceClaimSpec":         schema_pkg_apis_kube_v1_NamespaceClaimSpec(ref),
+		"github.com/appvia/kube-operator/pkg/apis/kube/v1.NamespaceClaimStatus":       schema_pkg_apis_kube_v1_NamespaceClaimStatus(ref),
 	}
 }
 
@@ -61,14 +64,160 @@ func schema_pkg_apis_kube_v1_NamespaceClaim(ref common.ReferenceCallback) common
 	}
 }
 
+func schema_pkg_apis_kube_v1_NamespaceClaimPolicy(ref common.ReferenceCallback) common.OpenAPIDefinition {
+	return common.OpenAPIDefinition{
+		Schema: spec.Schema{
+			SchemaProps: spec.SchemaProps{
+				Description: "NamespaceClaimPolicy is the Schema for the namespaceclaimpolicies API",
+				Type:        []string{"object"},
+				Properties: map[string]spec.Schema{
+					"kind": {
+						SchemaProps: spec.SchemaProps{
+							Description: "Kind is a string value representing the REST resource this object represents. Servers may infer this from the endpoint the client submits requests to. Cannot be updated. In CamelCase. More info: https://git.k8s.io/community/contributors/devel/api-conventions.md#types-kinds",
+							Type:        []string{"string"},
+							Format:      "",
+						},
+					},
+					"apiVersion": {
+						SchemaProps: spec.SchemaProps{
+							Description: "APIVersion defines the versioned schema of this representation of an object. Servers should convert recognized schemas to the latest internal value, and may reject unrecognized values. More info: https://git.k8s.io/community/contributors/devel/api-conventions.md#resources",
+							Type:        []string{"string"},
+							Format:      "",
+						},
+					},
+					"metadata": {
+						SchemaProps: spec.SchemaProps{
+							Ref: ref("k8s.io/apimachinery/pkg/apis/meta/v1.ObjectMeta"),
+						},
+					},
+					"spec": {
+						SchemaProps: spec.SchemaProps{
+							Ref: ref("github.com/appvia/kube-operator/pkg/apis/kube/v1.NamespaceClaimPolicySpec"),
+						},
+					},
+					"status": {
+						SchemaProps: spec.SchemaProps{
+							Ref: ref("github.com/appvia/kube-operator/pkg/apis/kube/v1.NamespaceClaimPolicyStatus"),
+						},
+					},
+				},
+			},
+		},
+		Dependencies: []string{
+			"github.com/appvia/kube-operator/pkg/apis/kube/v1.NamespaceClaimPolicySpec", "github.com/appvia/kube-operator/pkg/apis/kube/v1.NamespaceClaimPolicyStatus", "k8s.io/apimachinery/pkg/apis/meta/v1.ObjectMeta"},
+	}
+}
+
+func schema_pkg_apis_kube_v1_NamespaceClaimPolicySpec(ref common.ReferenceCallback) common.OpenAPIDefinition {
+	return common.OpenAPIDefinition{
+		Schema: spec.Schema{
+			SchemaProps: spec.SchemaProps{
+				Description: "NamespaceClaimPolicySpec defines the desired state of NamespaceClaimPolicy",
+				Type:        []string{"object"},
+				Properties: map[string]spec.Schema{
+					"defaultLabels": {
+						SchemaProps: spec.SchemaProps{
+							Description: "DefaultLabels is series of default labels to place on the namespace",
+							Type:        []string{"object"},
+							AdditionalProperties: &spec.SchemaOrBool{
+								Allows: true,
+								Schema: &spec.Schema{
+									SchemaProps: spec.SchemaProps{
+										Type:   []string{"string"},
+										Format: "",
+									},
+								},
+							},
+						},
+					},
+					"defaultAnnotations": {
+						SchemaProps: spec.SchemaProps{
+							Description: "DefaultAnnotations is a series of annotations which are places on all namespaces created by a claim",
+							Type:        []string{"object"},
+							AdditionalProperties: &spec.SchemaOrBool{
+								Allows: true,
+								Schema: &spec.Schema{
+									SchemaProps: spec.SchemaProps{
+										Type:   []string{"string"},
+										Format: "",
+									},
+								},
+							},
+						},
+					},
+				},
+			},
+		},
+	}
+}
+
+func schema_pkg_apis_kube_v1_NamespaceClaimPolicyStatus(ref common.ReferenceCallback) common.OpenAPIDefinition {
+	return common.OpenAPIDefinition{
+		Schema: spec.Schema{
+			SchemaProps: spec.SchemaProps{
+				Description: "NamespaceClaimPolicyStatus defines the observed state of NamespaceClaimPolicy",
+				Type:        []string{"object"},
+			},
+		},
+	}
+}
+
 func schema_pkg_apis_kube_v1_NamespaceClaimSpec(ref common.ReferenceCallback) common.OpenAPIDefinition {
 	return common.OpenAPIDefinition{
 		Schema: spec.Schema{
 			SchemaProps: spec.SchemaProps{
 				Description: "NamespaceClaimSpec defines the desired state of NamespaceClaim",
 				Type:        []string{"object"},
+				Properties: map[string]spec.Schema{
+					"use": {
+						SchemaProps: spec.SchemaProps{
+							Description: "Use is the owner of the namespace i.e. the cluster",
+							Ref:         ref("github.com/appvia/hub-apis/pkg/apis/core/v1.Ownership"),
+						},
+					},
+					"name": {
+						SchemaProps: spec.SchemaProps{
+							Description: "Name is the name of the namespace to create",
+							Type:        []string{"string"},
+							Format:      "",
+						},
+					},
+					"annotationsLabels": {
+						SchemaProps: spec.SchemaProps{
+							Description: "AnnotationsLabels is a series of annotations on the namespace",
+							Type:        []string{"object"},
+							AdditionalProperties: &spec.SchemaOrBool{
+								Allows: true,
+								Schema: &spec.Schema{
+									SchemaProps: spec.SchemaProps{
+										Type:   []string{"string"},
+										Format: "",
+									},
+								},
+							},
+						},
+					},
+					"namespaceLabels": {
+						SchemaProps: spec.SchemaProps{
+							Description: "NamespaceLabels is a series of labels for the namespace",
+							Type:        []string{"object"},
+							AdditionalProperties: &spec.SchemaOrBool{
+								Allows: true,
+								Schema: &spec.Schema{
+									SchemaProps: spec.SchemaProps{
+										Type:   []string{"string"},
+										Format: "",
+									},
+								},
+							},
+						},
+					},
+				},
+				Required: []string{"use", "name", "annotationsLabels", "namespaceLabels"},
 			},
 		},
+		Dependencies: []string{
+			"github.com/appvia/hub-apis/pkg/apis/core/v1.Ownership"},
 	}
 }
 
@@ -78,7 +227,44 @@ func schema_pkg_apis_kube_v1_NamespaceClaimStatus(ref common.ReferenceCallback) 
 			SchemaProps: spec.SchemaProps{
 				Description: "NamespaceClaimStatus defines the observed state of NamespaceClaim",
 				Type:        []string{"object"},
+				Properties: map[string]spec.Schema{
+					"status": {
+						SchemaProps: spec.SchemaProps{
+							Description: "Status is the status of the namespace",
+							Type:        []string{"string"},
+							Format:      "",
+						},
+					},
+					"conditions": {
+						VendorExtensible: spec.VendorExtensible{
+							Extensions: spec.Extensions{
+								"x-kubernetes-list-type": "",
+							},
+						},
+						SchemaProps: spec.SchemaProps{
+							Description: "Conditions is a series of things that caused the failure if any",
+							Type:        []string{"array"},
+							Items: &spec.SchemaOrArray{
+								Schema: &spec.Schema{
+									SchemaProps: spec.SchemaProps{
+										Ref: ref("github.com/appvia/hub-apis/pkg/apis/core/v1.Condition"),
+									},
+								},
+							},
+						},
+					},
+					"phase": {
+						SchemaProps: spec.SchemaProps{
+							Description: "Phase is used to hold the current phase of the resource",
+							Type:        []string{"string"},
+							Format:      "",
+						},
+					},
+				},
+				Required: []string{"status", "conditions", "phase"},
 			},
 		},
+		Dependencies: []string{
+			"github.com/appvia/hub-apis/pkg/apis/core/v1.Condition"},
 	}
 }

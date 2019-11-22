@@ -30,9 +30,87 @@ spec:
           type: object
         spec:
           description: NamespaceClaimSpec defines the desired state of NamespaceClaim
+          properties:
+            annotationsLabels:
+              additionalProperties:
+                type: string
+              description: AnnotationsLabels is a series of annotations on the namespace
+              type: object
+            name:
+              description: Name is the name of the namespace to create
+              minLength: 1
+              type: string
+            namespaceLabels:
+              additionalProperties:
+                type: string
+              description: NamespaceLabels is a series of labels for the namespace
+              type: object
+            use:
+              description: Use is the owner of the namespace i.e. the cluster
+              properties:
+                group:
+                  description: Group is the api group
+                  type: string
+                kind:
+                  description: Kind is the name of the resource under the group
+                  type: string
+                name:
+                  description: Name is name of the resource
+                  type: string
+                namespace:
+                  description: Namespace is the location of the object
+                  type: string
+                version:
+                  description: Version is the group version
+                  type: string
+              required:
+              - group
+              - kind
+              - name
+              - namespace
+              - version
+              type: object
+          required:
+          - annotationsLabels
+          - name
+          - namespaceLabels
+          - use
           type: object
         status:
           description: NamespaceClaimStatus defines the observed state of NamespaceClaim
+          properties:
+            conditions:
+              description: Conditions is a series of things that caused the failure
+                if any
+              items:
+                description: Condition is a reason why something failed
+                properties:
+                  code:
+                    description: Code is machine readable code of the error type
+                    type: integer
+                  detail:
+                    description: Detail is a actual error which might contain technical
+                      reference
+                    type: string
+                  message:
+                    description: Message is a human readable message
+                    type: string
+                required:
+                - code
+                - detail
+                - message
+                type: object
+              type: array
+            phase:
+              description: Phase is used to hold the current phase of the resource
+              type: string
+            status:
+              description: Status is the status of the namespace
+              type: string
+          required:
+          - conditions
+          - phase
+          - status
           type: object
       type: object
   version: v1

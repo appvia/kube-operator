@@ -39,7 +39,10 @@ func newReconciler(mgr manager.Manager) reconcile.Reconciler {
 // add adds a new Controller to mgr with r as the reconcile.Reconciler
 func add(mgr manager.Manager, r reconcile.Reconciler) error {
 	// Create a new controller
-	c, err := controller.New("namespaceclaim-controller", mgr, controller.Options{Reconciler: r})
+	c, err := controller.New("namespaceclaim-controller", mgr, controller.Options{
+		MaxConcurrentReconciles: 10,
+		Reconciler:              r,
+	})
 	if err != nil {
 		return err
 	}
@@ -71,24 +74,37 @@ func add(mgr manager.Manager, r reconcile.Reconciler) error {
 		"apiGroup", orgv1.SchemeGroupVersion.String(),
 	).Info("adding the watch api group")
 
-	err = c.Watch(&source.Kind{Type: &orgv1.TeamMembership{}}, &handler.EnqueueRequestsFromMapFunc{
-		ToRequests: handler.ToRequestsFunc(func(binding handler.MapObject) []reconcile.Request {
-			ctx := context.Background()
-			// @step: get a list of any namespaceclaims for the team across all workspaces
-			list, err := ListTeamNamespaceClaims(ctx, mgr.GetClient(), binding.Meta.GetNamespace())
-			if err != nil {
-				log.WithValues(
-					"team", binding.Meta.GetNamespace(),
-				).Error(err, "failed to retrieve a list of namespaceclaims in team namespace")
+	ctx := context.Background()
 
-				// @TODO we need way to surface these to the users
+	err = c.Watch(&source.Kind{Type: &orgv1.TeamMembership{}}, &handler.EnqueueRequestsFromMapFunc{
+		ToRequests: handler.ToRequestsFunc(func(o handler.MapObject) []reconcile.Request {
+			requests, err := ReconcileNamespaceClaims(ctx, mgr.GetClient(), o.Meta.GetName(), o.Meta.GetNamespace())
+			if err != nil {
+				log.Error(err, "failed to force reconcilation of namespaceclaims from trigger")
+
 				return []reconcile.Request{}
 			}
 
-			return NamespaceClaimsToRequests(list)
+			return requests
 		}),
 	})
 	if err != nil {
+		return err
+	}
+
+	// @step: watch for any changes to the team namespaceclaim policy and reconcile
+	if err := c.Watch(&source.Kind{Type: &kubev1.NamespaceClaimPolicy{}}, &handler.EnqueueRequestsFromMapFunc{
+		ToRequests: handler.ToRequestsFunc(func(o handler.MapObject) []reconcile.Request {
+			requests, err := ReconcileNamespaceClaims(ctx, mgr.GetClient(), o.Meta.GetName(), o.Meta.GetNamespace())
+			if err != nil {
+				log.Error(err, "failed to force reconcilation of namespaceclaims from trigger")
+
+				return []reconcile.Request{}
+			}
+
+			return requests
+		}),
+	}); err != nil {
 		return err
 	}
 
@@ -134,31 +150,25 @@ func (r *ReconcileNamespaceClaim) Reconcile(request reconcile.Request) (reconcil
 	// c) check if the namespace claim is being delete and if so remove the rbac rules
 	// d) if not deleting verify the rolebinding is correct in the remote cluster
 
-	if len(resource.GetFinalizers()) > 1 {
-		reqLogger.WithValues(
-			"finalizers", len(resource.GetFinalizers()),
-		).Info("resource has additional finalizers on performing cleanup, waiting")
-
-		return reconcile.Result{}, nil
-	}
-
 	// @step: lets be pesimesstic by nature
 	resource.Status.Status = metav1.StatusFailure
 
 	err = func() error {
+		teamName := HubLabel(resource, "team")
+
 		// @step: check the team the namespace is associated to exists - adding a guard clause
-		_, found, err := IsTeam(ctx, r.client, resource.Spec.Team.Name)
+		_, found, err := IsTeam(ctx, r.client, teamName)
 		if err != nil {
 			resource.Status.Conditions = []metav1.Status{{
 				Status:  metav1.StatusFailure,
-				Message: fmt.Sprintf("failed to check for existence of team: %s", resource.Spec.Team.Name),
+				Message: fmt.Sprintf("failed to check for existence of team: %s", teamName),
 			}}
 
 			return err
 		} else if !found {
 			resource.Status.Conditions = []metav1.Status{{
 				Status:  metav1.StatusFailure,
-				Message: fmt.Sprintf("team: %s does not exist", resource.Spec.Team.Name),
+				Message: fmt.Sprintf("team: %s does not exist", teamName),
 			}}
 
 			// meaning to don't bother to retry the reconcilation as there's nothing
@@ -181,8 +191,9 @@ func (r *ReconcileNamespaceClaim) Reconcile(request reconcile.Request) (reconcil
 			}
 
 			reqLogger.WithValues(
-				"cluster.namespace", resource.Spec.Cluster.Namespace,
 				"cluster.name", resource.Spec.Cluster.Name,
+				"cluster.namespace", resource.Spec.Cluster.Namespace,
+				"team", teamName,
 			).Error(err, "failed to create a kubernetes client from cluster configuration")
 
 			return err

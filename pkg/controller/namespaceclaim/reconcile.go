@@ -44,6 +44,7 @@ func (r *ReconcileNamespaceClaim) Update(
 
 	// --- Logic ---
 	// we have a client to the remote kubernetes cluster
+	// we check if the team has a team namespace policy
 	// we need to check the namespace is there and if not create it
 	// we need to check the rolebinding exists and if not create it
 	// we need to check that all the members of the team are in the binding
@@ -51,12 +52,15 @@ func (r *ReconcileNamespaceClaim) Update(
 	// we set the status of the resource to Success and the Phase is Installed
 	// we sit back, relax and contain our smug smile
 
+	team := HubLabel(resource, "team")
+	workspace := HubLabel(resource, "workspace")
+
 	rlog := log.WithValues(
 		"namespace.name", resource.Spec.Name,
 		"resource.name", resource.Name,
 		"resource.namespace", resource.Namespace,
-		"team.name", resource.Spec.Team.Name,
-		"workspace.name", resource.Spec.Workspace.Name,
+		"team.name", team,
+		"workspace.name", workspace,
 		"uid", uid)
 
 	//
