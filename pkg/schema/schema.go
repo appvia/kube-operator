@@ -122,11 +122,15 @@ definitions:
               - message
               type: object
             type: array
+          phase:
+            description: Phase is used to hold the current phase of the resource
+            type: string
           status:
             description: Status is the status of the namespace
             type: string
         required:
         - conditions
+        - phase
         - status
         type: object
     type: object
@@ -236,11 +240,15 @@ spec:
                 - message
                 type: object
               type: array
+            phase:
+              description: Phase is used to hold the current phase of the resource
+              type: string
             status:
               description: Status is the status of the namespace
               type: string
           required:
           - conditions
+          - phase
           - status
           type: object
       type: object
