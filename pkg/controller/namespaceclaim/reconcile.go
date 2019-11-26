@@ -22,6 +22,9 @@ import (
 	"fmt"
 	"net/http"
 
+	core "github.com/appvia/hub-apis/pkg/apis/core/v1"
+	"github.com/appvia/hub-apiserver/pkg/hub"
+
 	kubev1 "github.com/appvia/kube-operator/pkg/apis/kube/v1"
 
 	"github.com/gambol99/hub-utils/pkg/finalizers"
@@ -66,7 +69,7 @@ func (r *ReconcileNamespaceClaim) Update(
 	//
 	// @step: check the namespace exists, if not create it, else update it
 	//
-	annotations := resource.Spec.AnnotationsLabels
+	annotations := resource.Spec.Annotations
 	if annotations == nil {
 		annotations = make(map[string]string, 0)
 	}
@@ -75,7 +78,7 @@ func (r *ReconcileNamespaceClaim) Update(
 	namespace := &corev1.Namespace{
 		ObjectMeta: metav1.ObjectMeta{
 			Name:        resource.Spec.Name,
-			Labels:      resource.Spec.NamespaceLabels,
+			Labels:      resource.Spec.Labels,
 			Annotations: annotations,
 		},
 	}
@@ -102,8 +105,8 @@ func (r *ReconcileNamespaceClaim) Update(
 		return nil
 	}()
 	if err != nil {
-		resource.Status.Status = metav1.StatusFailure
-		resource.Status.Conditions = []metav1.Status{{
+		resource.Status.Status = core.FailureStatus
+		resource.Status.Conditions = []core.Condition{{
 			Message: err.Error(),
 			Code:    http.StatusServiceUnavailable,
 		}}
@@ -119,8 +122,8 @@ func (r *ReconcileNamespaceClaim) Update(
 			Name:      RoleBindingName,
 			Namespace: resource.Spec.Name,
 			Labels: map[string]string{
-				"hub.appvia.io/team":      resource.Spec.Team.Name,
-				"hub.appvia.io/workspace": resource.Spec.Workspace.Name,
+				"hub.appvia.io/team":      resource.GetLabels()[hub.Label("team")],
+				"hub.appvia.io/workspace": resource.GetLabels()[hub.Label("workspace")],
 			},
 			Annotations: map[string]string{"hub.appvia.io/uid": uid},
 		},
@@ -132,11 +135,12 @@ func (r *ReconcileNamespaceClaim) Update(
 	}
 
 	// @step: retrieve all the users in the team
-	membership, err := MakeTeamMembersList(ctx, cl, resource.Spec.Team.Name)
+	membership, err := MakeTeamMembersList(ctx, cl, resource.GetLabels()[hub.Label("team")])
 	if err != nil {
-		resource.Status.Status = metav1.StatusFailure
-		resource.Status.Conditions = []metav1.Status{{
-			Message: fmt.Sprintf("failed to retrieve a list of users: %s", err),
+		resource.Status.Status = core.FailureStatus
+		resource.Status.Conditions = []core.Condition{{
+			Detail:  err.Error(),
+			Message: "failed to retrieve a list of users",
 			Code:    http.StatusServiceUnavailable,
 		}}
 
@@ -169,14 +173,14 @@ func (r *ReconcileNamespaceClaim) Update(
 		}
 		// @step: set the phase of the resource
 		resource.Status.Phase = PhaseInstalled
-		resource.Status.Status = metav1.StatusSuccess
-		resource.Status.Conditions = []metav1.Status{}
+		resource.Status.Status = core.SuccessStatus
+		resource.Status.Conditions = []core.Condition{}
 
 		return nil
 	}()
 	if err != nil {
-		resource.Status.Status = metav1.StatusFailure
-		resource.Status.Conditions = []metav1.Status{{
+		resource.Status.Status = core.FailureStatus
+		resource.Status.Conditions = []core.Condition{{
 			Message: err.Error(),
 			Code:    http.StatusServiceUnavailable,
 		}}

@@ -6,6 +6,7 @@ import (
 
 	clusterv1 "github.com/appvia/hub-apis/pkg/apis/clusters/v1"
 	configv1 "github.com/appvia/hub-apis/pkg/apis/config/v1"
+	core "github.com/appvia/hub-apis/pkg/apis/core/v1"
 	orgv1 "github.com/appvia/hub-apis/pkg/apis/org/v1"
 	kubev1 "github.com/appvia/kube-operator/pkg/apis/kube/v1"
 
@@ -92,22 +93,6 @@ func add(mgr manager.Manager, r reconcile.Reconciler) error {
 		return err
 	}
 
-	// @step: watch for any changes to the team namespaceclaim policy and reconcile
-	if err := c.Watch(&source.Kind{Type: &kubev1.NamespaceClaimPolicy{}}, &handler.EnqueueRequestsFromMapFunc{
-		ToRequests: handler.ToRequestsFunc(func(o handler.MapObject) []reconcile.Request {
-			requests, err := ReconcileNamespaceClaims(ctx, mgr.GetClient(), o.Meta.GetName(), o.Meta.GetNamespace())
-			if err != nil {
-				log.Error(err, "failed to force reconcilation of namespaceclaims from trigger")
-
-				return []reconcile.Request{}
-			}
-
-			return requests
-		}),
-	}); err != nil {
-		return err
-	}
-
 	return nil
 }
 
@@ -159,15 +144,15 @@ func (r *ReconcileNamespaceClaim) Reconcile(request reconcile.Request) (reconcil
 		// @step: check the team the namespace is associated to exists - adding a guard clause
 		_, found, err := IsTeam(ctx, r.client, teamName)
 		if err != nil {
-			resource.Status.Conditions = []metav1.Status{{
-				Status:  metav1.StatusFailure,
+			resource.Status.Conditions = []core.Condition{{
+				Detail:  err.Error(),
 				Message: fmt.Sprintf("failed to check for existence of team: %s", teamName),
 			}}
 
 			return err
 		} else if !found {
-			resource.Status.Conditions = []metav1.Status{{
-				Status:  metav1.StatusFailure,
+			resource.Status.Conditions = []core.Condition{{
+				Detail:  err.Error(),
 				Message: fmt.Sprintf("team: %s does not exist", teamName),
 			}}
 
@@ -178,21 +163,21 @@ func (r *ReconcileNamespaceClaim) Reconcile(request reconcile.Request) (reconcil
 
 		// @step: retrieve the credentials from the associated cluster
 		kc, err := MakeClusterKubeClient(ctx, r.client, types.NamespacedName{
-			Namespace: resource.Spec.Cluster.Namespace,
-			Name:      resource.Spec.Cluster.Name,
+			Namespace: resource.Spec.Use.Namespace,
+			Name:      resource.Spec.Use.Name,
 		})
 		if err != nil {
-			resource.Status.Conditions = []metav1.Status{
+			resource.Status.Conditions = []core.Condition{
 				{
-					Status: metav1.StatusFailure,
+					Detail: err.Error(),
 					Message: fmt.Sprintf("failed creating kubernetes client from (%s/%s)",
-						resource.Spec.Cluster.Namespace, resource.Spec.Cluster.Name),
+						resource.Spec.Use.Namespace, resource.Spec.Use.Name),
 				},
 			}
 
 			reqLogger.WithValues(
-				"cluster.name", resource.Spec.Cluster.Name,
-				"cluster.namespace", resource.Spec.Cluster.Namespace,
+				"cluster.name", resource.Spec.Use.Name,
+				"cluster.namespace", resource.Spec.Use.Namespace,
 				"team", teamName,
 			).Error(err, "failed to create a kubernetes client from cluster configuration")
 

@@ -19,15 +19,17 @@ package namespaceclaim
 
 import (
 	"context"
-	"fmt"
 
 	kubev1 "github.com/appvia/kube-operator/pkg/apis/kube/v1"
-	"github.com/gambol99/hub-utils/pkg/finalizers"
-	"sigs.k8s.io/controller-runtime/pkg/client"
 
+	corev1 "github.com/appvia/hub-apis/pkg/apis/core/v1"
+	"github.com/appvia/hub-apiserver/pkg/hub"
+
+	"github.com/gambol99/hub-utils/pkg/finalizers"
 	kerrors "k8s.io/apimachinery/pkg/api/errors"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/client-go/kubernetes"
+	"sigs.k8s.io/controller-runtime/pkg/client"
 )
 
 // Delete is responsible for removig the namespace claim any remote configuration
@@ -37,14 +39,15 @@ func (r *ReconcileNamespaceClaim) Delete(
 	client kubernetes.Interface,
 	resource *kubev1.NamespaceClaim) error {
 
+	phase := resource.Status.Phase
+
 	rlog := log.WithValues(
 		"namespace.name", resource.Spec.Name,
 		"resource.name", resource.Name,
 		"resource.namespace", resource.Namespace,
-		"team.name", resource.Spec.Team.Name,
-		"workspace.name", resource.Spec.Workspace.Name)
-
-	phase := resource.Status.Phase
+		"resource.team", resource.GetLabels()[hub.Label("team")],
+		"resource.workspace", resource.GetLabels()[hub.Label("workspace")],
+	)
 
 	// @step: check if we are the current finalizer
 	finalizer := finalizers.NewFinalizer(cl, FinalizerName)
@@ -72,7 +75,7 @@ func (r *ReconcileNamespaceClaim) Delete(
 				resource.Status.Status = metav1.StatusSuccess
 				return nil
 			}
-			resource.Status.Conditions = []metav1.Status{{Message: "failed to delete the namespace in cluster"}}
+			resource.Status.Conditions = []corev1.Condition{{Message: "failed to delete the namespace in cluster"}}
 
 			return err
 		}
@@ -80,10 +83,10 @@ func (r *ReconcileNamespaceClaim) Delete(
 		return nil
 	}()
 	if err != nil {
-		resource.Status.Status = metav1.StatusFailure
-		resource.Status.Conditions = []metav1.Status{{
-			Status:  metav1.StatusFailure,
-			Message: fmt.Sprintf("failed to delete namespaceclaim: %s", err),
+		resource.Status.Status = corev1.FailureStatus
+		resource.Status.Conditions = []corev1.Condition{{
+			Detail:  err.Error(),
+			Message: "failed to delete namespaceclaim",
 		}}
 
 		return err
@@ -91,10 +94,10 @@ func (r *ReconcileNamespaceClaim) Delete(
 
 	// @step: remove the finalizer if one and allow the resource it be deleted
 	if err := finalizer.Remove(resource); err != nil {
-		resource.Status.Status = metav1.StatusFailure
-		resource.Status.Conditions = []metav1.Status{{
-			Status:  metav1.StatusFailure,
-			Message: fmt.Sprintf("failed to remove finalizer: %s", err),
+		resource.Status.Status = corev1.FailureStatus
+		resource.Status.Conditions = []corev1.Condition{{
+			Detail:  err.Error(),
+			Message: "failed to remove the finalizer",
 		}}
 
 		return err

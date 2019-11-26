@@ -21,12 +21,12 @@ golang:
 	@echo "--> Go Version"
 	@go version
 
-build: golang
+build: golang deps schema-gen operator-gen
 	@echo "--> Compiling the project"
 	@mkdir -p bin
 	go build -ldflags "${LFLAGS}" -o bin/${NAME} cmd/manager/*.go
 
-static: golang deps
+static: golang deps schema-gen operator-gen
 	@echo "--> Compiling the static binary"
 	@mkdir -p bin
 	CGO_ENABLED=0 GOOS=linux go build -a -tags netgo -ldflags "-w ${LFLAGS}" -o bin/${NAME} cmd/manager/*.go
@@ -39,11 +39,24 @@ docker-build:
 		-e GOOS=linux golang:${GOVERSION} \
 		make static
 
+operator-gen:
+	@echo "--> Generating Code via operator-sdk"
+	@operator-sdk generate k8s
+	@operator-sdk generate openapi
+
 docker-release:
 	@echo "--> Building a release image"
 	@$(MAKE) static
 	@$(MAKE) docker
 	@docker push ${REGISTRY}/${AUTHOR}/${NAME}:${VERSION}
+
+schema-gen:
+	@echo "--> Generate the CRD Schema for class registration"
+	@echo "--> pkg/apis/schema/schema.go"
+	@go run $(GOPATH)/src/github.com/appvia/hub-apis/cmd/schema-gen/main.go \
+		-crd-path ./deploy/crds \
+		-package schema \
+		-schema-file pkg/schema/schema.go
 
 docker: static
 	@echo "--> Building the docker image"
@@ -64,12 +77,9 @@ authors:
 
 dep-install:
 	@echo "--> Installing dependencies"
-	@dep ensure -v
 
 deps:
 	@echo "--> Installing build dependencies"
-	@go get -u github.com/golang/dep/cmd/dep
-	@$(MAKE) dep-install
 
 vet:
 	@echo "--> Running go vet $(VETARGS) $(PACKAGES)"

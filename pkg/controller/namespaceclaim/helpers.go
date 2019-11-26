@@ -26,8 +26,10 @@ import (
 	kubev1 "github.com/appvia/kube-operator/pkg/apis/kube/v1"
 	k8s "github.com/gambol99/hub-utils/pkg/kubernetes"
 
+	"github.com/appvia/hub-apiserver/pkg/hub"
+
 	kerrors "k8s.io/apimachinery/pkg/api/errors"
-	"k8s.io/apimachinery/pkg/runtime"
+	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/apimachinery/pkg/types"
 	"k8s.io/client-go/kubernetes"
 	"sigs.k8s.io/controller-runtime/pkg/client"
@@ -35,7 +37,7 @@ import (
 )
 
 // HubLabel returns a label off the resource
-func HubLabel(o runtime.Object, label string) string {
+func HubLabel(o metav1.Object, label string) string {
 	if o == nil {
 		return ""
 	}
@@ -44,7 +46,7 @@ func HubLabel(o runtime.Object, label string) string {
 		return ""
 	}
 
-	return labels["hub.appvia.io/"+label]
+	return labels[hub.Label(label)]
 }
 
 // HubNamespaceType returns a reference to the hub namespaced type
