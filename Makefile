@@ -10,7 +10,7 @@ LFLAGS ?= -X main.gitsha=${GIT_SHA} -X main.compiled=${BUILD_TIME}
 PACKAGES=$(shell go list ./...)
 REGISTRY=quay.io
 ROOT_DIR=${PWD}
-VERSION ?= $(shell awk '/version.*=/ { print $$3 }' cmd/manager/main.go | sed 's/"//g')
+VERSION ?= $(shell awk '/version.*=/ { print $$3 }' version/version.go | sed 's/"//g')
 VETARGS ?= -asmdecl -atomic -bool -buildtags -copylocks -methods -nilfunc -printf -rangeloops -unsafeptr
 
 .PHONY: test authors changelog build docker static release lint cover vet glide-install
@@ -60,7 +60,7 @@ schema-gen:
 
 docker: static
 	@echo "--> Building the docker image"
-	docker build -t ${REGISTRY}/${AUTHOR}/${NAME}:${VERSION} .
+	@operator-sdk build ${REGISTRY}/${AUTHOR}/${NAME}:${VERSION}
 
 release: static
 	mkdir -p release
