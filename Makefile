@@ -10,7 +10,7 @@ LFLAGS ?= -X main.gitsha=${GIT_SHA} -X main.compiled=${BUILD_TIME}
 PACKAGES=$(shell go list ./...)
 REGISTRY=quay.io
 ROOT_DIR=${PWD}
-VERSION ?= $(shell awk '/version.*=/ { print $$3 }' cmd/manager/main.go | sed 's/"//g')
+VERSION ?= $(shell awk '/Version.*=/ { print $$3 }' version/version.go | sed 's/"//g')
 VETARGS ?= -asmdecl -atomic -bool -buildtags -copylocks -methods -nilfunc -printf -rangeloops -unsafeptr
 
 .PHONY: test authors changelog build docker static release lint cover vet glide-install
@@ -21,12 +21,12 @@ golang:
 	@echo "--> Go Version"
 	@go version
 
-build: golang
+build: golang deps schema-gen operator-gen
 	@echo "--> Compiling the project"
 	@mkdir -p bin
 	go build -ldflags "${LFLAGS}" -o bin/${NAME} cmd/manager/*.go
 
-static: golang deps
+static: golang deps schema-gen operator-gen
 	@echo "--> Compiling the static binary"
 	@mkdir -p bin
 	CGO_ENABLED=0 GOOS=linux go build -a -tags netgo -ldflags "-w ${LFLAGS}" -o bin/${NAME} cmd/manager/*.go
@@ -39,15 +39,28 @@ docker-build:
 		-e GOOS=linux golang:${GOVERSION} \
 		make static
 
+operator-gen:
+	@echo "--> Generating Code via operator-sdk"
+	@operator-sdk generate k8s
+	@operator-sdk generate openapi
+
 docker-release:
 	@echo "--> Building a release image"
 	@$(MAKE) static
 	@$(MAKE) docker
 	@docker push ${REGISTRY}/${AUTHOR}/${NAME}:${VERSION}
 
+schema-gen:
+	@echo "--> Generate the CRD Schema for class registration"
+	@echo "--> pkg/apis/schema/schema.go"
+	@go run $(GOPATH)/src/github.com/appvia/hub-apis/cmd/schema-gen/main.go \
+		-crd-path ./deploy/crds \
+		-package schema \
+		-schema-file pkg/schema/schema.go
+
 docker: static
 	@echo "--> Building the docker image"
-	docker build -t ${REGISTRY}/${AUTHOR}/${NAME}:${VERSION} .
+	@operator-sdk build ${REGISTRY}/${AUTHOR}/${NAME}:${VERSION}
 
 release: static
 	mkdir -p release
@@ -64,12 +77,9 @@ authors:
 
 dep-install:
 	@echo "--> Installing dependencies"
-	@dep ensure -v
 
 deps:
 	@echo "--> Installing build dependencies"
-	@go get -u github.com/golang/dep/cmd/dep
-	@$(MAKE) dep-install
 
 vet:
 	@echo "--> Running go vet $(VETARGS) $(PACKAGES)"

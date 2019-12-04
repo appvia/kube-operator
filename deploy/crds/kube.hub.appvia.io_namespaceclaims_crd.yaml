@@ -31,20 +31,19 @@ spec:
         spec:
           description: NamespaceClaimSpec defines the desired state of NamespaceClaim
           properties:
-            annotationsLabels:
+            annotations:
               additionalProperties:
                 type: string
-              description: AnnotationsLabels is a series of annotations on the namespace
+              description: Annotations is a series of annotations on the namespace
+              type: object
+            labels:
+              additionalProperties:
+                type: string
+              description: Labels is a series of labels for the namespace
               type: object
             name:
               description: Name is the name of the namespace to create
-              minLength: 1
               type: string
-            namespaceLabels:
-              additionalProperties:
-                type: string
-              description: NamespaceLabels is a series of labels for the namespace
-              type: object
             use:
               description: Use is the owner of the namespace i.e. the cluster
               properties:
@@ -71,9 +70,9 @@ spec:
               - version
               type: object
           required:
-          - annotationsLabels
+          - annotations
+          - labels
           - name
-          - namespaceLabels
           - use
           type: object
         status:

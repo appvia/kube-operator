@@ -96,6 +96,12 @@ func main() {
 		os.Exit(1)
 	}
 
+	// @step: create a client and register the classes
+	if err := publishOperator(cfg); err != nil {
+		log.Error(err, "failed to register the classes")
+		os.Exit(1)
+	}
+
 	ctx := context.TODO()
 	// Become the leader before proceeding
 	err = leader.Become(ctx, "kube-operator-lock")

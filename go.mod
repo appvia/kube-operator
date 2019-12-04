@@ -1,16 +1,19 @@
 module github.com/appvia/kube-operator
 
 require (
-	github.com/appvia/gke-operator v0.0.0-20191105162906-92844b1efca9 // indirect
-	github.com/appvia/hub-apis v0.0.0-20191122123803-5128583f5c8b
+	github.com/appvia/gke-operator v0.0.0-20191125182049-631c0bb1f51b // indirect
+	github.com/appvia/hub-apis v0.0.1
+	github.com/appvia/hub-apiserver v0.0.0-20191125213601-2ea3877d03a6
 	github.com/davecgh/go-spew v1.1.1
 	github.com/gambol99/hub-utils v0.0.0-20191108161735-f3ffc063b42e
-	github.com/go-openapi/spec v0.17.2
+	github.com/ghodss/yaml v1.0.1-0.20180820084758-c7ce16629ff4
+	github.com/go-openapi/spec v0.19.4
 	github.com/operator-framework/operator-sdk v0.12.1-0.20191106084303-5006ea85501e
-	github.com/spf13/pflag v1.0.3
-	k8s.io/api v0.0.0-20190918195907-bd6ac527cfd2
-	k8s.io/apimachinery v0.0.0-20191108065633-c18f71bf2947
-	k8s.io/client-go v11.0.1-0.20190409021438-1a26190bd76a+incompatible
+	github.com/spf13/pflag v1.0.5
+	k8s.io/api v0.0.0
+	k8s.io/apiextensions-apiserver v0.0.0
+	k8s.io/apimachinery v0.0.0
+	k8s.io/client-go v11.0.1-0.20190805182717-6502b5e7b1b5+incompatible
 	k8s.io/kube-openapi v0.0.0-20191107075043-30be4d16710a
 	sigs.k8s.io/controller-runtime v0.3.0
 )

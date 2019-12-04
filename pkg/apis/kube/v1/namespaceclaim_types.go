@@ -2,6 +2,7 @@ package v1
 
 import (
 	corev1 "github.com/appvia/hub-apis/pkg/apis/core/v1"
+
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 )
 
@@ -9,16 +10,14 @@ import (
 // +k8s:openapi-gen=true
 type NamespaceClaimSpec struct {
 	// Use is the owner of the namespace i.e. the cluster
-	// +kubebuilder:validation:Required
+	// +k8s:openapi-gen=false
 	Use corev1.Ownership `json:"use"`
 	// Name is the name of the namespace to create
-	// +kubebuilder:validation:MinLength=1
-	// +kubebuilder:validation:Required
 	Name string `json:"name"`
-	// AnnotationsLabels is a series of annotations on the namespace
-	AnnotationsLabels map[string]string `json:"annotationsLabels"`
-	// NamespaceLabels is a series of labels for the namespace
-	NamespaceLabels map[string]string `json:"namespaceLabels"`
+	// Annotations is a series of annotations on the namespace
+	Annotations map[string]string `json:"annotations"`
+	// Labels is a series of labels for the namespace
+	Labels map[string]string `json:"labels"`
 	// @TODO we need to add limits, quotas etc
 }
 
