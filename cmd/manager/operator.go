@@ -41,7 +41,7 @@ var (
 		},
 		Spec: configv1.ClassSpec{
 			APIVersion:    kubev1.SchemeGroupVersion.String(),
-			AutoProvision: true,
+			AutoProvision: false,
 			Category:      "kubernetes",
 			Description:   "Provides the ability to create a number of resouce types a kubernetes cluster",
 			DisplayName:   "Kubernetes Provideir",
