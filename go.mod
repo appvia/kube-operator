@@ -2,7 +2,7 @@ module github.com/appvia/kube-operator
 
 require (
 	github.com/appvia/gke-operator v0.0.0-20191125182049-631c0bb1f51b // indirect
-	github.com/appvia/hub-apis v0.0.1
+	github.com/appvia/hub-apis v0.0.3-0.20191203145225-393e969c273b
 	github.com/appvia/hub-apiserver v0.0.0-20191125213601-2ea3877d03a6
 	github.com/davecgh/go-spew v1.1.1
 	github.com/gambol99/hub-utils v0.0.0-20191108161735-f3ffc063b42e

@@ -65,6 +65,8 @@ github.com/appvia/hub-apis v0.0.0-20191125132135-535a33ccf0d6/go.mod h1:MVvrfPNp
 github.com/appvia/hub-apis v0.0.0-20191125144657-cef7545093eb/go.mod h1:MVvrfPNpqBzTPO6pFytWcR8J/b5D3/YsjjFnMLhM/yE=
 github.com/appvia/hub-apis v0.0.1 h1:kk7OclgK/wjcDmWwBE7Xf2p9zcFA8i0T1EHIZxfpiHE=
 github.com/appvia/hub-apis v0.0.1/go.mod h1:MVvrfPNpqBzTPO6pFytWcR8J/b5D3/YsjjFnMLhM/yE=
+github.com/appvia/hub-apis v0.0.3-0.20191203145225-393e969c273b h1:xUZp2UG1xPNJOT0MBQ5O5NZyrK4ccqaaBx0abXCuOb0=
+github.com/appvia/hub-apis v0.0.3-0.20191203145225-393e969c273b/go.mod h1:uvG3gs+mb5kDW+z5RWUVGnd/qF9aH1uRrA/QuZZ5YcE=
 github.com/appvia/hub-apiserver v0.0.0-20191119142106-6230938e7739/go.mod h1:MClWwG1eI9KuqlTTYhPMZDjNz7Qv269O52vCVaBDhos=
 github.com/appvia/hub-apiserver v0.0.0-20191125213601-2ea3877d03a6 h1:Lnicd3VhCdrDhXqHxUcSO91AFuMYlnM0S90k8oyKIMM=
 github.com/appvia/hub-apiserver v0.0.0-20191125213601-2ea3877d03a6/go.mod h1:0YOR03egRvJvEHa30mDAKDHiAVAYjVwH/1uAiwt6bHU=
@@ -198,6 +200,7 @@ github.com/globalsign/mgo v0.0.0-20180905125535-1ca0a4f7cbcb/go.mod h1:xkRDCp4j0
 github.com/glycerine/go-unsnap-stream v0.0.0-20181221182339-f9677308dec2 h1:Ujru1hufTHVb++eG6OuNDKMxZnGIvF6o/u8q/8h2+I4=
 github.com/glycerine/go-unsnap-stream v0.0.0-20181221182339-f9677308dec2/go.mod h1:/20jfyN9Y5QPEAprSgKAUr+glWDY39ZiUEAYOEv5dsE=
 github.com/glycerine/goconvey v0.0.0-20190410193231-58a59202ab31/go.mod h1:Ogl1Tioa0aV7gstGFO7KhffUsb9M4ydbEbbxpcEDc24=
+github.com/go-bindata/go-bindata v3.1.2+incompatible/go.mod h1:xK8Dsgwmeed+BBsSy2XTopBn/8uK2HWuGSnA11C3Joo=
 github.com/go-ini/ini v1.25.4/go.mod h1:ByCAeIL28uOIIG0E3PJtZPDL8WnHpFKFOtgjp+3Ies8=
 github.com/go-kit/kit v0.8.0/go.mod h1:xBxKIO96dXMWWy0MnWVtmwkA9/13aqxPnvrjFYMA2as=
 github.com/go-logfmt/logfmt v0.3.0/go.mod h1:Qt1PoO58o5twSAckw1HlFXLmHsOX5/0LbT9GBnD5lWE=
